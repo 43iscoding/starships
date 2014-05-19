@@ -31,3 +31,7 @@ function setKey(keyCode, state) {
 function isPressed(key) {
     return pressed[key];
 }
+
+window.input = {
+    isPressed: isPressed
+};

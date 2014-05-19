@@ -12,18 +12,6 @@ var crates = [];
 var BG_STARS_NUM = 100;
 var bgStars = new Array(BG_STARS_NUM);
 var inertia = 0.1;
-var shipImage = new Image();
-shipImage.src = "resources/starship.png";
-var shieldImage = new Image();
-shieldImage.src = "resources/shield.png";
-var bulletImage = new Image();
-bulletImage.src = "resources/laser.png";
-var asteroidImage = new Image();
-asteroidImage.src = "resources/asteroidPale.png";
-var crateImage = new Image();
-crateImage.src = "resources/crates.png";
-var uiImage = new Image();
-uiImage.src = "resources/ui.png";
 var time = 0;
 var score = 0;
 var highScore = 0;
@@ -35,62 +23,24 @@ var INITIAL_LIVES = 3;
 var INVULNERABILITY = 100;
 var SHAKE = [0,0,0]; //shake screen (x,y,timeToShake)
 var TIME_TO_SHAKE = 30;
-
-var Prime = function() {
-    this.primes = [37];
-    // current generator number
-    this.prime = 37;
-
-    // return true if NUM is generator
-    this.isPrime = function(num) {
-        var result = true;
-        if (num !== 2) {
-            if (num % 2 == 0) {
-                result = false;
-            } else {
-                for (var x=3; x <= Math.sqrt(num); x += 2) {
-                    if (num % x == 0) result = false;
-                }
-            }
-        }
-        return result;
-    };
-
-    this.getPrime = function(index) {
-        while (this.primes[index] == null) {
-            this.nextPrime(3);
-        }
-        return this.primes[index];
-    };
-
-    // return next generator number
-    this.nextPrime = function(step) {
-        if (step == null) step = 1;
-        this.prime++;
-        while (step > 0) {
-            while (!this.isPrime(this.prime)) this.prime++;
-            step--;
-        }
-        this.primes.push(this.prime);
-        return this.prime;
-    }
-};
-
 var generator = new Prime();
+var ship;
 
-var ship = {x: WIDTH / 10, y: HEIGHT / 2,
-    sprite: new Sprite(shipImage, [0,0], [30,10], 3, 3),
-    xSpeed: 0, ySpeed: 0, maxSpeed : 2, applyInertia: true,
-    cannotLeaveScreen: true, bullets: INITIAL_BULLETS, lives: INITIAL_LIVES,
-    shield: new Sprite(shieldImage, [0,0], [40, 20], 2, 1), invulnerable: 0
-};
+function createShip() {
+    return {x: WIDTH / 10, y: HEIGHT / 2,
+        sprite: new Sprite(res.get("starship"), [0,0], [30,10], 3, 3),
+        xSpeed: 0, ySpeed: 0, maxSpeed : 2, applyInertia: true,
+        cannotLeaveScreen: true, bullets: INITIAL_BULLETS, lives: INITIAL_LIVES,
+        shield: new Sprite(res.get("shield"), [0,0], [40, 20], 2, 1), invulnerable: 0
+    };
+}
 
 function generateAsteroid() {
     var pos = getFreePosition(18, 18, WIDTH * 11 / 10);
     return {
         x: pos.x, y: pos.y,
         xSpeed: -1, ySpeed: 0, worldSpeedAffected: true,
-        sprite: new Sprite(asteroidImage, [18 * Math.round(Math.random() * 2), 0], [18,18], 1, 0)
+        sprite: new Sprite(res.get("asteroidPale"), [18 * Math.round(Math.random() * 2), 0], [18,18], 1, 0)
     }
 }
 
@@ -98,7 +48,7 @@ function generateBullet() {
     return {
         x: ship.x + ship.sprite.size[0], y: ship.y + ship.sprite.size[1] / 2,
         xSpeed: 5, ySpeed: 0, worldSpeedAffected: false,
-        sprite: new Sprite(bulletImage, [0,0], [10, 5], 1, 0)
+        sprite: new Sprite(res.get("laser"), [0,0], [10, 5], 1, 0)
     }
 }
 
@@ -108,7 +58,7 @@ function generateCrate() {
     return {
         x: pos.x, y: pos.y,
         xSpeed: -1, ySpeed: 0, worldSpeedAffected: true,
-        sprite: new Sprite(crateImage, [20 * id, 0], [20,20], 1, 0),
+        sprite: new Sprite(res.get("crates"), [20 * id, 0], [20,20], 1, 0),
         ammo: (id + 1) * 2, type: id == 3 ? "life" : "ammo"
     }
 }
@@ -132,13 +82,19 @@ function getFreePosition(width, height, desirableX, desirableY) {
     return {x: x, y: y};
 }
 
-function init() {
+function load() {
+    res.onReady(start);
+    res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui"]);
+}
+
+function start() {
     canvas = document.getElementById('canvas');
     canvas.width = WIDTH;
     canvas.height = HEIGHT + PANEL_HEIGHT;
     context = canvas.getContext("2d");
     initInput();
     initBackground();
+    ship = createShip();
     tick();
 }
 
@@ -155,17 +111,17 @@ function tick() {
 }
 
 function processInput() {
-    if (isPressed("UP")) {
+    if (input.isPressed("UP")) {
         ship.ySpeed = -ship.maxSpeed;
-    } else if (isPressed("DOWN")) {
+    } else if (input.isPressed("DOWN")) {
         ship.ySpeed = ship.maxSpeed;
     }
-    if (isPressed("LEFT")) {
+    if (input.isPressed("LEFT")) {
         ship.xSpeed = -ship.maxSpeed;
-    } else if (isPressed("RIGHT")) {
+    } else if (input.isPressed("RIGHT")) {
         ship.xSpeed = ship.maxSpeed;
     }
-    if (isPressed("SPACE") && lastTimeShot + shootDelay < Date.now() && ship.bullets > 0) {
+    if (input.isPressed("SPACE") && lastTimeShot + shootDelay < Date.now() && ship.bullets > 0) {
         shoot();
     }
 }
@@ -347,7 +303,7 @@ function render() {
 }
 
 function renderUI() {
-    context.drawImage(uiImage, 0, HEIGHT);
+    context.drawImage(res.get("ui"), 0, HEIGHT);
     context.font = "25px Visitor";
     context.textAlign = "left";
 
