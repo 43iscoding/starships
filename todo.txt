@@ -1,5 +1,4 @@
 . coins
-. resources engine
 . refactor to entity class
 . expiring effects
 . explosions
