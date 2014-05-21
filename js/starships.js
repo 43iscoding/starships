@@ -124,6 +124,10 @@ function processInput() {
     if (input.isPressed("SPACE") && lastTimeShot + shootDelay < Date.now() && ship.bullets > 0) {
         shoot();
     }
+
+    if (input.isPressed("R")) {
+        reset();
+    }
 }
 
 function shoot() {

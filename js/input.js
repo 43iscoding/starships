@@ -22,6 +22,8 @@ function setKey(keyCode, state) {
             key = 'RIGHT'; break;
         case 40: //down
             key = 'DOWN'; break;
+        case 82: //r
+            key = 'R'; break;
         default:
             key = String.fromCharCode(keyCode); break;
     }

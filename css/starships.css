@@ -1,0 +1,35 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+}
+
+canvas {
+    display: block;
+    margin: auto;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.wrapper {
+    width: 200px;
+    margin: 0 auto;
+    padding-left: 30px;
+    text-align: center;
+    margin-top: 36em;
+}
+
+#instructions {
+    float: left;
+    font-family: Visitor;
+    font-size: 1.6em;
+    color: #333;
+}
+
+.key {
+    color: #151;
+}
