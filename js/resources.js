@@ -50,5 +50,26 @@ function setCallback(func) {
 window.res = {
     load: load,
     get: get,
-    onReady: setCallback
+    onReady: setCallback,
+    setCookie: setCookie,
+    getCookie: getCookie
 };
+
+function setCookie(name,value,days) {
+    var date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + date.toGMTString();
+    document.cookie = name + "=" + value + "; " + expires;
+    console.log(document.cookie);
+}
+
+function getCookie(name, defaultValue) {
+    var nameEquals = name + "=";
+    var cookies = document.cookie.split(';');
+    for(var i=0;i < cookies.length;i++) {
+        var cookie = cookies[i];
+        while (cookie.charAt(0)==' ') cookie = cookie.substring(1,cookie.length);
+        if (cookie.indexOf(nameEquals) == 0) return cookie.substring(nameEquals.length,cookie.length);
+    }
+    return defaultValue;
+}

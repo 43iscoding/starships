@@ -208,8 +208,9 @@ function reset() {
     asteroids = [];
     bullets = [];
     crates = [];
+    var highScore = res.getCookie("highscore", 0);
     if (score > highScore) {
-        highScore = score;
+        res.setCookie("highscore", score, 30);
     }
     score = 0;
     time = 0;
@@ -315,6 +316,7 @@ function renderUI() {
 
     context.fillStyle = "#171";
     context.fillText(pad(Math.floor(score).toString(), 4), WIDTH - 52, HEIGHT + 17);
+    var highScore = res.getCookie("highscore", 0);
     context.fillText(pad(Math.floor(highScore).toString(), 4), WIDTH - 52, HEIGHT + 32);
     context.fillText(pad(ship.bullets.toString(), 2), 94, HEIGHT + 17);
     context.fillText(pad(ship.lives.toString(), 2), 94, HEIGHT + 32);
