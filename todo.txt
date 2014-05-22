@@ -3,3 +3,7 @@
 . expiring effects
 . explosions
 . menu
+. more sound effects
+. music
+. generic entity collision
+. rework art
