@@ -123,7 +123,7 @@
 
         if (input.isPressed("R") && lastTimeRestarted + 1000 < Date.now()) {
             lastTimeRestarted = Date.now();
-            reset();
+            restart();
         }
     }
 
@@ -205,7 +205,7 @@
         }
     }
 
-    function reset() {
+    function restart() {
         initBackground();
         resetShip();
         asteroids = [];
@@ -250,7 +250,8 @@
                     ship.lives--;
                     ship.invulnerable = INVULNERABILITY;
                     if (ship.lives == 0) {
-                        reset();
+                        //showOverlay();
+                        restart();
                         return;
                     }
                 }
@@ -266,6 +267,10 @@
                 }
             }
         }
+    }
+
+    function showOverlay() {
+        document.getElementById("overlay").style.display = "block";
     }
 
     function collision(entity1, entity2) {
