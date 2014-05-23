@@ -240,15 +240,13 @@
         for (i = asteroids.length - 1; i >= 0; i--) {
             if (collision(asteroids[i], ship)) {
                 if (ship.invulnerable == 0) {
+                    sound.play("explosion");
                     SHAKE[2] = TIME_TO_SHAKE;
                     ship.lives--;
                     ship.invulnerable = INVULNERABILITY;
                     if (ship.lives == 0) {
-                        sound.play("death");
                         reset();
                         return;
-                    } else {
-                        sound.play("explosion");
                     }
                 }
                 asteroids.splice(i, 1);
