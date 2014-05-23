@@ -75,6 +75,11 @@
     }
 
     function loadGame() {
+        lowLag.init({ sm2url : "lib/sm2/swf/",
+                      urlPrefix : "resources/sound/" });
+        lowLag.load(['explosion.wav'], 'explosion');
+        lowLag.load(['laser.wav'], 'laser');
+        lowLag.load(['powerup.wav'], 'powerup');
         res.onReady(start);
         res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui"]);
     }
