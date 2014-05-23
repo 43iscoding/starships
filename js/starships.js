@@ -1,4 +1,69 @@
 (function() {
+
+    function Entity(x, y, width, height, xSpeed, ySpeed, type, sprite, args) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.xSpeed = xSpeed;
+        this.ySpeed = ySpeed;
+        this.type = type;
+        this.sprite = new Sprite(res.get(sprite['name']), sprite['pos'], [width, height],
+            sprite['frames'] == undefined ? 1 : sprite['frames'],
+            sprite['speed'] == undefined ? 0 : sprite['speed']);
+        if (args != undefined) {
+            this.worldSpeed = args['worldSpeed'] == undefined ? false : args['worldSpeed'];
+            this.inertia = args['inertia'] == undefined ? false : args['inertia'];
+            this.leaveScreen = args['leaveScreen'] == undefined ? true : args['leaveScreen'];
+        }
+    }
+
+    Entity.prototype = {
+        updateSprite : function() {
+            this.sprite.update();
+        },
+        isWorldSpeedAffected : function() {
+            return this.worldSpeed;
+        },
+        shouldApplyInertia : function() {
+            return this.inertia;
+        },
+        canLeaveScreen : function() {
+            return this.leaveScreen;
+        }
+    };
+
+    function createShipNew() {
+        return new Entity(WIDTH / 10, HEIGHT / 2, 0, 0, "ship",
+            new Sprite(res.get("starship"), [0, 0], [30, 10], 3, 3),
+            {inertia : true, leaveScreen : false});
+
+            //bullets: INITIAL_BULLETS, lives: INITIAL_LIVES,
+            //shield: new Sprite(res.get("shield"), [0, 0], [40, 20], 2, 1), invulnerable: 0
+    }
+
+    function generateAsteroid() {
+        var pos = getFreePosition(18, 18, WIDTH * 11 / 10);
+        return new Entity(pos.x, pos.y, 18, 18, -1, 0, "asteroid",
+            {name : "asteroidPale", pos : [18 * Math.round(Math.random() * 2), 0]},
+            {worldSpeed : true});
+    }
+
+    function generateBullet() {
+        return new Entity(ship.x + ship.sprite.size[0], ship.y + ship.sprite.size[1] / 2, 10, 5,
+            5, 0, "bullet",
+            {name : "laser", pos : [0, 0]});
+    }
+
+    function generateCrateNew() {
+        var pos = getFreePosition(18, 18, WIDTH * 11 / 10);
+        var id = Math.round(Math.random() * 3);
+        return new Entity(pos.x, pos.y, 20, 20, -1, 0, "bonus",
+            {name : "crates", pos : [20 * id, 0]},
+            {worldSpeed : true});
+        //ammo: (id + 1) * 2, type: id == 3 ? "life" : "ammo"
+    }
+
     var canvas;
     var context;
 
@@ -25,23 +90,6 @@
             cannotLeaveScreen: true, bullets: INITIAL_BULLETS, lives: INITIAL_LIVES,
             shield: new Sprite(res.get("shield"), [0, 0], [40, 20], 2, 1), invulnerable: 0
         };
-    }
-
-    function generateAsteroid() {
-        var pos = getFreePosition(18, 18, WIDTH * 11 / 10);
-        return {
-            x: pos.x, y: pos.y,
-            xSpeed: -1, ySpeed: 0, worldSpeedAffected: true,
-            sprite: new Sprite(res.get("asteroidPale"), [18 * Math.round(Math.random() * 2), 0], [18, 18], 1, 0)
-        }
-    }
-
-    function generateBullet() {
-        return {
-            x: ship.x + ship.sprite.size[0], y: ship.y + ship.sprite.size[1] / 2,
-            xSpeed: 5, ySpeed: 0, worldSpeedAffected: false,
-            sprite: new Sprite(res.get("laser"), [0, 0], [10, 5], 1, 0)
-        }
     }
 
     function generateCrate() {
