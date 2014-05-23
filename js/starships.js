@@ -11,6 +11,7 @@
     var time = 0;
     var score = 0;
     var lastTimeShot = 0;
+    var lastTimeRestarted = 0;
     var SHAKE = [0, 0, 0]; //shake screen (x,y,timeToShake)
     var worldSpeed = WORLD_SPEED;
 
@@ -115,7 +116,8 @@
             shoot();
         }
 
-        if (input.isPressed("R")) {
+        if (input.isPressed("R") && lastTimeRestarted + 1000 < Date.now()) {
+            lastTimeRestarted = Date.now();
             reset();
         }
     }
@@ -238,13 +240,15 @@
         for (i = asteroids.length - 1; i >= 0; i--) {
             if (collision(asteroids[i], ship)) {
                 if (ship.invulnerable == 0) {
-                    sound.play("explosion");
                     SHAKE[2] = TIME_TO_SHAKE;
                     ship.lives--;
                     ship.invulnerable = INVULNERABILITY;
                     if (ship.lives == 0) {
+                        sound.play("death");
                         reset();
                         return;
+                    } else {
+                        sound.play("explosion");
                     }
                 }
                 asteroids.splice(i, 1);
