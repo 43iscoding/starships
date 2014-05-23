@@ -12,7 +12,7 @@
             sprite['frames'] == undefined ? 1 : sprite['frames'],
             sprite['speed'] == undefined ? 0 : sprite['speed']);
         if (args != undefined) {
-            this.worldSpeed = args['worldSpeed'] == undefined ? false : args['worldSpeed'];
+            this.worldSpeedAffected = args['worldSpeed'] == undefined ? false : args['worldSpeed'];
             this.inertia = args['inertia'] == undefined ? false : args['inertia'];
             this.leaveScreen = args['leaveScreen'] == undefined ? true : args['leaveScreen'];
         }
@@ -23,7 +23,7 @@
             this.sprite.update();
         },
         isWorldSpeedAffected : function() {
-            return this.worldSpeed;
+            return this.worldSpeedAffected;
         },
         shouldApplyInertia : function() {
             return this.inertia;
@@ -77,6 +77,7 @@
     var score = 0;
     var lastTimeShot = 0;
     var lastTimeRestarted = 0;
+    var lastTimeMuted = 0;
     var SHAKE = [0, 0, 0]; //shake screen (x,y,timeToShake)
     var worldSpeed = WORLD_SPEED;
 
@@ -124,12 +125,13 @@
 
     function loadGame() {
         lowLag.init({ sm2url : "lib/sm2/swf/",
-                      urlPrefix : "resources/sound/" });
+                      urlPrefix : "resources/sound/",
+                      debug : "none"});
         lowLag.load(['explosion.wav'], 'explosion');
         lowLag.load(['laser.wav'], 'laser');
         lowLag.load(['powerup.wav'], 'powerup');
         res.onReady(start);
-        res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui"]);
+        res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui", "sound"]);
     }
 
     function start() {
@@ -172,6 +174,11 @@
         if (input.isPressed("R") && lastTimeRestarted + 1000 < Date.now()) {
             lastTimeRestarted = Date.now();
             restart();
+        }
+
+        if (input.isPressed("M") && lastTimeMuted + 1000 < Date.now()) {
+            lastTimeMuted = Date.now();
+            sound.toggleMute();
         }
     }
 
@@ -372,6 +379,13 @@
         context.fillText("LIVES", 29, HEIGHT + 32);
 
         context.fillStyle = "#171";
+        //draw sound button
+        if (sound.muted()) {
+            context.drawImage(res.get("sound"),30, 0, 30, 30, WIDTH - 15, 0, 15, 15);
+        } else {
+            context.drawImage(res.get("sound"),0, 0, 30, 30, WIDTH - 15, 0, 15, 15);
+        }
+
         context.fillText(pad(Math.floor(score).toString(), 4), WIDTH - 52, HEIGHT + 17);
         var highScore = res.getCookie("highscore", 0);
         context.fillText(pad(Math.floor(highScore).toString(), 4), WIDTH - 52, HEIGHT + 32);

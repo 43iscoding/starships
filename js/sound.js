@@ -1,11 +1,14 @@
 (function() {
 
+    var mute = false;
+
     var LOW_LAG_ENABLED = true;
 
     var prefix = "resources/sound/";
     var postfix = ".wav";
 
     function play(name) {
+        if (mute) return;
         if (LOW_LAG_ENABLED) {
             lowLag.play(name);
             return;
@@ -18,7 +21,15 @@
         return prefix + name + postfix;
     }
 
+    function toggleMute() {
+        mute = !mute;
+    }
+
     window.sound = {
-        play: play
+        play: play,
+        toggleMute: toggleMute,
+        muted: function() {
+            return mute;
+        }
     };
 }());

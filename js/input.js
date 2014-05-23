@@ -10,23 +10,26 @@
     function setKey(keyCode, state) {
         var key;
         switch (keyCode) {
-            case 32: //space
+            case 32:
                 key = 'SPACE';
                 break;
-            case 37: //left
+            case 37:
                 key = 'LEFT';
                 break;
-            case 38: //up
+            case 38:
                 key = 'UP';
                 break;
-            case 39: //right
+            case 39:
                 key = 'RIGHT';
                 break;
-            case 40: //down
+            case 40:
                 key = 'DOWN';
                 break;
-            case 82: //r
+            case 82:
                 key = 'R';
+                break;
+            case 77:
+                key = 'M';
                 break;
             default:
                 key = String.fromCharCode(keyCode);
