@@ -35,7 +35,7 @@
     Ship.prototype = Object.create(Entity.prototype);
 
     function Bonus(x, y, xSpeed, ySpeed, sprite, args) {
-        Entity.call(this, x, y, 18, 18, xSpeed, ySpeed, "bonus", sprite, args);
+        Entity.call(this, x, y, 20, 20, xSpeed, ySpeed, "bonus", sprite, args);
         this.ammo = args['ammo'];
         this.bonusType = args['type'];
     }
@@ -62,7 +62,7 @@
     }
 
     function generateCrate() {
-        var pos = getFreePosition(18, 18, WIDTH * 11 / 10);
+        var pos = getFreePosition(20, 20, WIDTH * 11 / 10);
         var id = Math.round(Math.random() * 3);
         return new Bonus(pos.x, pos.y, -1, 0,
             {name : "crates", pos : [20 * id, 0]},
@@ -141,9 +141,9 @@
     function tick() {
         time++;
         if (time % 50 == 0) {
-            worldSpeed += 0.0625;
+            worldSpeed += 0.05;
         }
-        score += 1 / fps;
+        increaseScore(1 / fps);
         processInput();
         worldStep();
         render();
@@ -260,10 +260,6 @@
         asteroids = [];
         bullets = [];
         crates = [];
-        var highScore = res.getCookie("highscore", 0);
-        if (score > highScore) {
-            res.setCookie("highscore", score);
-        }
         score = 0;
         time = 0;
         worldSpeed = WORLD_SPEED;
@@ -309,12 +305,20 @@
             }
             for (var j = bullets.length - 1; j >= 0; j--) {
                 if (collision(asteroids[i], bullets[j])) {
-                    score += 5;
+                    increaseScore(5);
                     asteroids.splice(i, 1);
                     bullets.splice(j, 1);
                     break;
                 }
             }
+        }
+    }
+
+    function increaseScore(value) {
+        score += value;
+        var highScore = res.getCookie("highscore", 0);
+        if (score > highScore) {
+            res.setCookie("highscore", score);
         }
     }
 
