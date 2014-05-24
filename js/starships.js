@@ -126,9 +126,22 @@
         canvas.width = WIDTH;
         canvas.height = HEIGHT + PANEL_HEIGHT;
         context = canvas.getContext("2d");
+        initOnClick();
         initBackground();
         ship = createShip();
         tick();
+    }
+
+    function initOnClick() {
+        canvas.addEventListener('click', function(event) {
+            var canvasDiv = document.getElementById('canvasDiv');
+            var x = event.clientX - canvasDiv.offsetLeft;
+            var y = event.clientY - canvasDiv.offsetTop;
+            //mute button
+            if (contains(WIDTH - 15, 0, 15, 15, x, y)) {
+                sound.toggleMute();
+            }
+        });
     }
 
     function tick() {
@@ -331,6 +344,9 @@
             (y1 + h1 < y2));
     }
 
+    function contains(x1, y1, w1, h1, x2, y2) {
+        return !(x1 > x2 || x1 + w1 < x2 || y1 > y2 || y1 + h1 < y2);
+    }
 
     function applyInertia(entity) {
         var delta = INERTIA;
