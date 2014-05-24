@@ -11,10 +11,11 @@
         this.sprite = new Sprite(res.get(sprite['name']), sprite['pos'], [width, height],
             sprite['frames'] == undefined ? 1 : sprite['frames'],
             sprite['speed'] == undefined ? 0 : sprite['speed']);
+        this.canLeaveScreen = true;
         if (args != undefined) {
             this.worldSpeedAffected = args['worldSpeed'] == undefined ? false : args['worldSpeed'];
-            this.applyInertia = args['applyInertia'] == undefined ? false : args['applyInertia'];
-            this.canLeaveScreen = args['canLeaveScreen'] == undefined ? true : args['canLeaveScreen'];
+            this.applyInertia = args['inertia'] == undefined ? false : args['inertia'];
+            this.canLeaveScreen = args['leaveScreen'] == undefined ? true : args['leaveScreen'];
         }
     }
 
@@ -26,6 +27,7 @@
 
     function Ship(x, y, xSpeed, ySpeed, sprite, args) {
         Entity.call(this, x, y, 30, 10, xSpeed, ySpeed, "ship", sprite, args);
+        this.maxSpeed = 2;
         this.bullets = INITIAL_BULLETS;
         this.lives = INITIAL_LIVES;
         this.invulnerable = 0;
@@ -42,26 +44,26 @@
 
     Bonus.prototype = Object.create(Entity.prototype);
 
-    function createShipNew() {
+    function createShip() {
         return new Ship(WIDTH / 10, HEIGHT / 2, 0, 0,
             {name : "starship", pos : [0,0], frames: 3, speed: 3},
             {inertia : true, leaveScreen : false});
     }
 
-    function generateAsteroid() {
+    function createAsteroid() {
         var pos = getFreePosition(18, 18, WIDTH * 11 / 10);
         return new Entity(pos.x, pos.y, 18, 18, -1, 0, "asteroid",
             {name : "asteroidPale", pos : [18 * Math.round(Math.random() * 2), 0]},
             {worldSpeed : true});
     }
 
-    function generateBullet() {
+    function createBullet() {
         return new Entity(ship.x + ship.sprite.size[0], ship.y + ship.sprite.size[1] / 2, 10, 5,
             5, 0, "bullet",
             {name : "laser", pos : [0, 0]});
     }
 
-    function generateCrate() {
+    function createBonus() {
         var pos = getFreePosition(20, 20, WIDTH * 11 / 10);
         var id = Math.round(Math.random() * 3);
         return new Bonus(pos.x, pos.y, -1, 0,
@@ -88,15 +90,6 @@
 
     var generator = new Prime();
     var ship;
-
-    function createShip() {
-        return {x: WIDTH / 10, y: HEIGHT / 2,
-            sprite: new Sprite(res.get("starship"), [0, 0], [30, 10], 3, 3),
-            xSpeed: 0, ySpeed: 0, maxSpeed: 2, applyInertia: true,
-            cannotLeaveScreen: true, bullets: INITIAL_BULLETS, lives: INITIAL_LIVES,
-            shield: new Sprite(res.get("shield"), [0, 0], [40, 20], 2, 1), invulnerable: 0
-        };
-    }
 
     function getFreePosition(width, height, desirableX, desirableY) {
         var tries = 100;
@@ -180,7 +173,7 @@
         sound.play("laser");
         ship.bullets--;
         lastTimeShot = Date.now();
-        bullets.push(generateBullet());
+        bullets.push(createBullet());
     }
 
     function updateEntities(entities) {
@@ -201,7 +194,7 @@
             entity.x += entity.xSpeed;
             entity.y += entity.ySpeed;
         }
-        if (entity.cannotLeaveScreen) {
+        if (!entity.canLeaveScreen) {
             if (entity.x < 0) entity.x = 0;
             if (entity.x + entity.sprite.size[0] > WIDTH) entity.x = WIDTH - entity.sprite.size[0];
             if (entity.y < 0) entity.y = 0;
@@ -213,7 +206,7 @@
         generateAsteroids(time);
 
         if (time % 500 == 0) {
-            crates.push(generateCrate());
+            crates.push(createBonus());
         }
         updateEntity(ship);
         if (ship.invulnerable > 0) {
@@ -249,7 +242,7 @@
     function generateAsteroids(ticks) {
         for (var i = Math.floor(ticks / 1000); i >= 0; i--) {
             if (ticks % generator.getPrime(i) == 0) {
-                asteroids.push(generateAsteroid());
+                asteroids.push(createAsteroid());
             }
         }
     }
