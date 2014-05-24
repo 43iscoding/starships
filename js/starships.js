@@ -13,33 +13,39 @@
             sprite['speed'] == undefined ? 0 : sprite['speed']);
         if (args != undefined) {
             this.worldSpeedAffected = args['worldSpeed'] == undefined ? false : args['worldSpeed'];
-            this.inertia = args['inertia'] == undefined ? false : args['inertia'];
-            this.leaveScreen = args['leaveScreen'] == undefined ? true : args['leaveScreen'];
+            this.applyInertia = args['applyInertia'] == undefined ? false : args['applyInertia'];
+            this.canLeaveScreen = args['canLeaveScreen'] == undefined ? true : args['canLeaveScreen'];
         }
     }
 
     Entity.prototype = {
         updateSprite : function() {
             this.sprite.update();
-        },
-        isWorldSpeedAffected : function() {
-            return this.worldSpeedAffected;
-        },
-        shouldApplyInertia : function() {
-            return this.inertia;
-        },
-        canLeaveScreen : function() {
-            return this.leaveScreen;
         }
     };
 
-    function createShipNew() {
-        return new Entity(WIDTH / 10, HEIGHT / 2, 0, 0, "ship",
-            new Sprite(res.get("starship"), [0, 0], [30, 10], 3, 3),
-            {inertia : true, leaveScreen : false});
+    function Ship(x, y, xSpeed, ySpeed, sprite, args) {
+        Entity.call(this, x, y, 30, 10, xSpeed, ySpeed, "ship", sprite, args);
+        this.bullets = INITIAL_BULLETS;
+        this.lives = INITIAL_LIVES;
+        this.invulnerable = 0;
+        this.shield = new Sprite(res.get("shield"), [0, 0], [40, 20], 2, 1);
+    }
 
-            //bullets: INITIAL_BULLETS, lives: INITIAL_LIVES,
-            //shield: new Sprite(res.get("shield"), [0, 0], [40, 20], 2, 1), invulnerable: 0
+    Ship.prototype = Object.create(Entity.prototype);
+
+    function Bonus(x, y, xSpeed, ySpeed, sprite, args) {
+        Entity.call(this, x, y, 18, 18, xSpeed, ySpeed, "bonus", sprite, args);
+        this.ammo = args['ammo'];
+        this.bonusType = args['type'];
+    }
+
+    Bonus.prototype = Object.create(Entity.prototype);
+
+    function createShipNew() {
+        return new Ship(WIDTH / 10, HEIGHT / 2, 0, 0,
+            {name : "starship", pos : [0,0], frames: 3, speed: 3},
+            {inertia : true, leaveScreen : false});
     }
 
     function generateAsteroid() {
@@ -55,13 +61,12 @@
             {name : "laser", pos : [0, 0]});
     }
 
-    function generateCrateNew() {
+    function generateCrate() {
         var pos = getFreePosition(18, 18, WIDTH * 11 / 10);
         var id = Math.round(Math.random() * 3);
-        return new Entity(pos.x, pos.y, 20, 20, -1, 0, "bonus",
+        return new Bonus(pos.x, pos.y, -1, 0,
             {name : "crates", pos : [20 * id, 0]},
-            {worldSpeed : true});
-        //ammo: (id + 1) * 2, type: id == 3 ? "life" : "ammo"
+            {worldSpeed : true, ammo: (id + 1) * 2, type : id == 3 ? 'life' : 'ammo'});
     }
 
     var canvas;
@@ -91,17 +96,6 @@
             cannotLeaveScreen: true, bullets: INITIAL_BULLETS, lives: INITIAL_LIVES,
             shield: new Sprite(res.get("shield"), [0, 0], [40, 20], 2, 1), invulnerable: 0
         };
-    }
-
-    function generateCrate() {
-        var pos = getFreePosition(18, 18, WIDTH * 11 / 10);
-        var id = Math.round(Math.random() * 3);
-        return {
-            x: pos.x, y: pos.y,
-            xSpeed: -1, ySpeed: 0, worldSpeedAffected: true,
-            sprite: new Sprite(res.get("crates"), [20 * id, 0], [20, 20], 1, 0),
-            ammo: (id + 1) * 2, type: id == 3 ? "life" : "ammo"
-        }
     }
 
     function getFreePosition(width, height, desirableX, desirableY) {
@@ -268,7 +262,7 @@
         crates = [];
         var highScore = res.getCookie("highscore", 0);
         if (score > highScore) {
-            res.setCookie("highscore", score, 30);
+            res.setCookie("highscore", score);
         }
         score = 0;
         time = 0;
@@ -289,9 +283,9 @@
         for (var i = crates.length - 1; i >= 0; i--) {
             if (collision(crates[i], ship)) {
                 sound.play("powerup");
-                if (crates[i].type == "ammo") {
+                if (crates[i].bonusType == "ammo") {
                     ship.bullets += crates[i].ammo;
-                } else if (crates[i].type = "life") {
+                } else if (crates[i].bonusType = "life") {
                     ship.lives++;
                 }
                 crates.splice(i, 1);

@@ -1,6 +1,9 @@
 (function() {
+
+    var COOKIE_EXPIRES = 365;
+
     var cache = {};
-    var callback = null;
+    var callbacks = [];
 
     var prefix = "resources/";
     var postfix = ".png";
@@ -26,7 +29,11 @@
             var image = new Image();
             image.onload = function () {
                 cache[url] = image;
-                if (loaded()) callback();
+                if (loaded()) {
+                    callbacks.forEach(function(callback) {
+                        callback();
+                    })
+                }
             };
             cache[url] = false;
             image.src = format(url);
@@ -44,27 +51,28 @@
         return true;
     }
 
-    function setCallback(func) {
-        callback = func;
+    function addCallback(func) {
+        callbacks.push(func);
     }
 
     window.res = {
         load: load,
         get: get,
-        onReady: setCallback,
+        onReady: addCallback,
         setCookie: setCookie,
         getCookie: getCookie
     };
 
     function setCookie(name, value, days) {
+        if (days == undefined) days = COOKIE_EXPIRES;
         var date = new Date();
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
         var expires = "expires=" + date.toGMTString();
         document.cookie = name + "=" + value + "; " + expires;
-        console.log(document.cookie);
     }
 
     function getCookie(name, defaultValue) {
+        if (defaultValue == undefined) defaultValue = null;
         var nameEquals = name + "=";
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {

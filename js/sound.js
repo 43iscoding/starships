@@ -1,6 +1,6 @@
 (function() {
 
-    var mute = false;
+    var muted = res.getCookie('muted', true) == "true";
 
     var LOW_LAG_ENABLED = true;
 
@@ -8,7 +8,7 @@
     var postfix = ".wav";
 
     function play(name) {
-        if (mute) return;
+        if (muted) return;
         if (LOW_LAG_ENABLED) {
             lowLag.play(name);
             return;
@@ -22,14 +22,15 @@
     }
 
     function toggleMute() {
-        mute = !mute;
+        muted = !muted;
+        res.setCookie('muted', muted);
     }
 
     window.sound = {
         play: play,
         toggleMute: toggleMute,
         muted: function() {
-            return mute;
+            return muted;
         }
     };
 }());
