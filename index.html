@@ -20,9 +20,12 @@
     <link rel="stylesheet" href="css/starships.css">
 </head>
 <body onload="loadGame()">
-    <div id="overlay" style="display: none">
-        <div id="overlayText">
+    <div class="overlay" id="overlay" style="display:none">
+        <div class="overlayText" id="death" style="display:none">
             Press <span class="overlayKey">R</span> to restart
+        </div>
+        <div class="overlayText" id="pause" style="display:none">
+            Paused
         </div>
     </div>
 	<div id="canvasDiv">

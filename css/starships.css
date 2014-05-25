@@ -18,7 +18,7 @@ html, body {
 	margin-top: -130px;
 }
 
-#overlay {
+.overlay {
     display: block;
     margin: auto;
 
@@ -36,12 +36,13 @@ html, body {
     z-index: 1;
 }
 
-#overlayText {
-    position: relative;
+.overlayText {
+    position: absolute;
     top: 50%;
 
-    margin-top: -10px;
+    margin-top: -30px;
     vertical-align: middle;
+    width:100%;
     text-align: center;
 
     font-family: Visitor;

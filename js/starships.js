@@ -85,10 +85,12 @@
     var lastTimeShot = 0;
     var lastTimeRestarted = 0;
     var lastTimeMuted = 0;
+    var lastTimePaused = 0;
     var SHAKE = [0, 0, 0]; //shake screen (x,y,timeToShake)
     var worldSpeed = WORLD_SPEED;
 
     var alive = true;
+    var paused = false;
 
     var generator = new Prime();
     var ship;
@@ -147,29 +149,43 @@
     }
 
     function tick() {
-        time++;
-        if (time % 50 == 0) {
-            worldSpeed += 0.05;
-        }
-        if (alive) increaseScore(1 / fps);
         processInput();
-        worldStep();
+        if (!paused) {
+            time++;
+            if (time % 50 == 0) {
+                worldSpeed += 0.05;
+            }
+            worldStep();
+            if (alive) increaseScore(1 / fps);
+        }
         render();
         setTimeout(tick, 1000 / fps);
     }
 
     function processInput() {
-        if (input.isPressed("R") && lastTimeRestarted + 1000 < Date.now()) {
+        if (input.isPressed("R") && lastTimeRestarted + 200 < Date.now()) {
             lastTimeRestarted = Date.now();
             restart();
         }
 
-        if (input.isPressed("M") && lastTimeMuted + 1000 < Date.now()) {
+        if (input.isPressed("M") && lastTimeMuted + 200 < Date.now()) {
             lastTimeMuted = Date.now();
             sound.toggleMute();
         }
 
         if (!alive) return;
+
+        if (input.isPressed("P") && lastTimePaused + 200 < Date.now()) {
+            lastTimePaused = Date.now();
+            if (!paused) {
+                showOverlay("pause");
+            } else {
+                hideOverlay("pause");
+            }
+            paused = !paused;
+        }
+
+        if (paused) return;
 
         if (input.isPressed("UP")) {
             ship.ySpeed = -ship.maxSpeed;
@@ -268,7 +284,7 @@
     }
 
     function restart() {
-        hideOverlay();
+        hideOverlay("death");
         initBackground();
         resetShip();
         alive = true;
@@ -312,7 +328,7 @@
         });
         alive = false;
         ship.invulnerable = 0;
-        showOverlay();
+        showOverlay("death");
     }
 
     //returns true if entity should be deleted after collision
@@ -360,12 +376,14 @@
         }
     }
 
-    function showOverlay() {
+    function showOverlay(overlayId) {
         document.getElementById("overlay").style.display = "block";
+        document.getElementById(overlayId).style.display = "block";
     }
 
-    function hideOverlay() {
+    function hideOverlay(overlayId) {
         document.getElementById("overlay").style.display = "none";
+        document.getElementById(overlayId).style.display = "none";
     }
 
     function collision(entity1, entity2) {

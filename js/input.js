@@ -25,6 +25,9 @@
             case 40:
                 key = 'DOWN';
                 break;
+            case 80:
+                key = 'P';
+                break;
             case 82:
                 key = 'R';
                 break;
