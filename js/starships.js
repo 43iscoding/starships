@@ -159,6 +159,18 @@
     }
 
     function processInput() {
+        if (input.isPressed("R") && lastTimeRestarted + 1000 < Date.now()) {
+            lastTimeRestarted = Date.now();
+            restart();
+        }
+
+        if (input.isPressed("M") && lastTimeMuted + 1000 < Date.now()) {
+            lastTimeMuted = Date.now();
+            sound.toggleMute();
+        }
+
+        if (!alive) return;
+
         if (input.isPressed("UP")) {
             ship.ySpeed = -ship.maxSpeed;
         } else if (input.isPressed("DOWN")) {
@@ -173,15 +185,7 @@
             shoot();
         }
 
-        if (input.isPressed("R") && lastTimeRestarted + 1000 < Date.now()) {
-            lastTimeRestarted = Date.now();
-            restart();
-        }
 
-        if (input.isPressed("M") && lastTimeMuted + 1000 < Date.now()) {
-            lastTimeMuted = Date.now();
-            sound.toggleMute();
-        }
     }
 
     function shoot() {
