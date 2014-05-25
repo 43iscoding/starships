@@ -16,6 +16,8 @@
             this.worldSpeedAffected = args['worldSpeed'] == undefined ? false : args['worldSpeed'];
             this.applyInertia = args['inertia'] == undefined ? false : args['inertia'];
             this.canLeaveScreen = args['leaveScreen'] == undefined ? true : args['leaveScreen'];
+            this.destroyOnExitLeft = args['destroyLeft'] == undefined ? false : args['destroyLeft'];
+            this.destroyOnExitRight = args['destroyRight'] == undefined ? false : args['destroyRight'];
         }
     }
 
@@ -54,13 +56,13 @@
         var pos = getFreePosition(18, 18, WIDTH * 11 / 10);
         return new Entity(pos.x, pos.y, 18, 18, -1, 0, "asteroid",
             {name : "asteroidPale", pos : [18 * Math.round(Math.random() * 2), 0]},
-            {worldSpeed : true});
+            {worldSpeed : true, destroyLeft: true});
     }
 
     function createBullet() {
-        return new Entity(ship.x + ship.sprite.size[0], ship.y + ship.sprite.size[1] / 2, 10, 5,
+        return new Entity(ship.x + ship.width, ship.y + ship.height / 2, 10, 5,
             5, 0, "bullet",
-            {name : "laser", pos : [0, 0]});
+            {name : "laser", pos : [0, 0]}, {destroyRight: true});
     }
 
     function createBonus() {
@@ -74,9 +76,7 @@
     var canvas;
     var context;
 
-    var asteroids = [];
-    var bullets = [];
-    var crates = [];
+    var entities = [];
 
     var bgStars = new Array(BG_STARS_NUM);
 
@@ -98,12 +98,11 @@
             var collision = false;
             x = desirableX != null ? desirableX : Math.random() * (WIDTH - width);
             y = desirableY != null ? desirableY : Math.random() * (HEIGHT - height);
-            for (var i = 0; i < asteroids.length && !collision; i++) {
-                collision = intersect(asteroids[i].x, asteroids[i].y, asteroids[i].sprite.size[0], asteroids[i].sprite.size[1], x, y, width, height);
+
+            for (var i = 0; i < entities.length && !collision; i++) {
+                collision = intersect(entities[i].x, entities[i].y, entities[i].width, entities[i].height, x, y, width, height);
             }
-            for (i = 0; i < crates.length && !collision; i++) {
-                collision = intersect(crates[i].x, crates[i].y, crates[i].sprite.size[0], crates[i].sprite.size[1], x, y, width, height);
-            }
+
             if (!collision) return {x: x, y: y};
         }
         console.log("Warning - random free slot not found: (" + x + ":" + y + " )");
@@ -126,13 +125,14 @@
         canvas.width = WIDTH;
         canvas.height = HEIGHT + PANEL_HEIGHT;
         context = canvas.getContext("2d");
-        initOnClick();
-        initBackground();
+        initMouseEvents();
+
         ship = createShip();
+        restart();
         tick();
     }
 
-    function initOnClick() {
+    function initMouseEvents() {
         canvas.addEventListener('click', function(event) {
             var canvasDiv = document.getElementById('canvasDiv');
             var x = event.clientX - canvasDiv.offsetLeft;
@@ -186,7 +186,7 @@
         sound.play("laser");
         ship.bullets--;
         lastTimeShot = Date.now();
-        bullets.push(createBullet());
+        entities.push(createBullet());
     }
 
     function updateEntities(entities) {
@@ -209,36 +209,37 @@
         }
         if (!entity.canLeaveScreen) {
             if (entity.x < 0) entity.x = 0;
-            if (entity.x + entity.sprite.size[0] > WIDTH) entity.x = WIDTH - entity.sprite.size[0];
+            if (entity.x + entity.width > WIDTH) entity.x = WIDTH - entity.width;
             if (entity.y < 0) entity.y = 0;
-            if (entity.y + entity.sprite.size[1] > HEIGHT) entity.y = HEIGHT - entity.sprite.size[1];
+            if (entity.y + entity.height > HEIGHT) entity.y = HEIGHT - entity.height;
         }
+
+        return (entity.destroyOnExitRight && entity.x > WIDTH) ||
+               (entity.destroyOnExitLeft && entity.x + entity.width < 0);
     }
 
     function worldStep() {
         generateAsteroids(time);
 
         if (time % 500 == 0) {
-            crates.push(createBonus());
+            entities.push(createBonus());
         }
-        updateEntity(ship);
+
         if (ship.invulnerable > 0) {
             ship.invulnerable--; //TODO: move to expiring effects
             ship.shield.update();
         } else {
             ship.shield.reset();
         }
-        for (var i = 0; i < asteroids.length; i++) {
-            updateEntity(asteroids[i]);
 
-            if (asteroids[i].x + asteroids[i].sprite.size[0] < 0) {
-                asteroids.splice(i, 1);
+        for (var i = 0; i < entities.length; i++) {
+            if (updateEntity(entities[i])) {
+                entities.splice(i, 1);
                 i--;
             }
         }
-        updateEntities(bullets);
-        updateEntities(crates);
-        processCollisions();
+
+        runCollisions();
         if (SHAKE[2] > 0) {
             SHAKE[2]--;
             SHAKE[0] = Math.round(Math.random() * 4 - 2);
@@ -255,7 +256,7 @@
     function generateAsteroids(ticks) {
         for (var i = Math.floor(ticks / 1000); i >= 0; i--) {
             if (ticks % generator.getPrime(i) == 0) {
-                asteroids.push(createAsteroid());
+                entities.push(createAsteroid());
             }
         }
     }
@@ -263,9 +264,7 @@
     function restart() {
         initBackground();
         resetShip();
-        asteroids = [];
-        bullets = [];
-        crates = [];
+        entities = [ship];
         score = 0;
         time = 0;
         worldSpeed = WORLD_SPEED;
@@ -280,42 +279,59 @@
         ship.invulnerable = 0;
     }
 
-
-    function processCollisions() {
-        for (var i = crates.length - 1; i >= 0; i--) {
-            if (collision(crates[i], ship)) {
-                sound.play("powerup");
-                if (crates[i].bonusType == "ammo") {
-                    ship.bullets += crates[i].ammo;
-                } else if (crates[i].bonusType = "life") {
-                    ship.lives++;
+    function runCollisions() {
+        var toDelete = [];
+        entities.forEach(function(entity) {
+            for (var i = entities.length - 1; i >= 0; i--) {
+                if (entity == entities[i]) continue;
+                var result = onCollide(entity, entities[i]);
+                if (result == "delete") {
+                    toDelete.push(entity);
+                } else if (result == "restart") {
+                    restart();
+                    return;
                 }
-                crates.splice(i, 1);
             }
-        }
-        for (i = asteroids.length - 1; i >= 0; i--) {
-            if (collision(asteroids[i], ship)) {
-                if (ship.invulnerable == 0) {
-                    sound.play("explosion");
-                    SHAKE[2] = TIME_TO_SHAKE;
-                    ship.lives--;
-                    ship.invulnerable = INVULNERABILITY;
-                    if (ship.lives == 0) {
-                        //showOverlay();
-                        restart();
-                        return;
+        });
+        entities = entities.filter(function(entity) {
+            return toDelete.indexOf(entity) == -1;
+        });
+    }
+
+    //returns true if entity should be deleted after collision
+    function onCollide(entity, collided) {
+        if (!collision(entity, collided)) return null;
+        switch (collided.type) {
+            case "ship": return entity.type != "bullet" ? "delete" : null;
+            case "bullet": return entity.type == "asteroid" ? "delete" : null;
+            case "bonus": {
+                if (entity.type == "ship") {
+                    sound.play("powerup");
+                    if (collided.bonusType == "ammo") {
+                        ship.bullets += collided.ammo;
+                    } else if (collided.bonusType = "life") {
+                        ship.lives++;
                     }
                 }
-                asteroids.splice(i, 1);
-                continue;
+                return null;
             }
-            for (var j = bullets.length - 1; j >= 0; j--) {
-                if (collision(asteroids[i], bullets[j])) {
+            case "asteroid": {
+                if (entity.type == "bullet") {
                     increaseScore(5);
-                    asteroids.splice(i, 1);
-                    bullets.splice(j, 1);
-                    break;
+                    return "delete";
+                } else if (entity.type == "ship") {
+                    if (ship.invulnerable == 0) {
+                        sound.play("explosion");
+                        SHAKE[2] = TIME_TO_SHAKE;
+                        ship.lives--;
+                        ship.invulnerable = INVULNERABILITY;
+                        if (ship.lives == 0) {
+                            //showOverlay();
+                            return "restart";
+                        }
+                    }
                 }
+                return null;
             }
         }
     }
@@ -333,8 +349,8 @@
     }
 
     function collision(entity1, entity2) {
-        return intersect(entity1.x, entity1.y, entity1.sprite.size[0], entity1.sprite.size[1],
-            entity2.x, entity2.y, entity2.sprite.size[0], entity2.sprite.size[1]);
+        return intersect(entity1.x, entity1.y, entity1.width, entity1.height,
+            entity2.x, entity2.y, entity2.width, entity2.height);
     }
 
     function intersect(x1, y1, w1, h1, x2, y2, w2, h2) {
@@ -364,10 +380,7 @@
     function render() {
         renderBackground();
 
-        renderEntities(bullets);
-        renderEntities(asteroids);
-        renderEntities(crates);
-        renderEntity(ship);
+        renderEntities(entities);
         if (ship.invulnerable > 0) {
             renderSprite(ship.shield, ship.x - 5, ship.y - 5);
         }
