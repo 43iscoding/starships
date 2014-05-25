@@ -30,8 +30,8 @@ html, body {
     height: 240px;
     margin-left: -160px;
     margin-top: -130px;
-    background: #111;
-    opacity: 0.9;
+    background: #000;
+    opacity: 0.7;
 
     z-index: 1;
 }
@@ -46,8 +46,8 @@ html, body {
 
     font-family: Visitor;
     font-size: 1.6em;
-    color: #000;
-    opacity: 0.7;
+    color: #555;
+    opacity: 1;
 }
 
 #instructions {
@@ -65,6 +65,10 @@ html, body {
 	font-family: Visitor;
     font-size: 1.6em;
     color: #333;
+}
+
+.overlayKey {
+    color: #373;
 }
 
 .key {

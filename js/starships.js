@@ -88,6 +88,8 @@
     var SHAKE = [0, 0, 0]; //shake screen (x,y,timeToShake)
     var worldSpeed = WORLD_SPEED;
 
+    var alive = true;
+
     var generator = new Prime();
     var ship;
 
@@ -149,7 +151,7 @@
         if (time % 50 == 0) {
             worldSpeed += 0.05;
         }
-        increaseScore(1 / fps);
+        if (alive) increaseScore(1 / fps);
         processInput();
         worldStep();
         render();
@@ -221,7 +223,7 @@
     function worldStep() {
         generateAsteroids(time);
 
-        if (time % 500 == 0) {
+        if (time % 500 == 0 && alive) {
             entities.push(createBonus());
         }
 
@@ -262,8 +264,10 @@
     }
 
     function restart() {
+        hideOverlay();
         initBackground();
         resetShip();
+        alive = true;
         entities = [ship];
         score = 0;
         time = 0;
@@ -288,7 +292,7 @@
                 if (result == "delete") {
                     toDelete.push(entity);
                 } else if (result == "restart") {
-                    restart();
+                    onDeath();
                     return;
                 }
             }
@@ -296,6 +300,15 @@
         entities = entities.filter(function(entity) {
             return toDelete.indexOf(entity) == -1;
         });
+    }
+
+    function onDeath() {
+        entities = entities.filter(function(entity) {
+            return entity.type != "ship" && entity.type != "bonus";
+        });
+        alive = false;
+        ship.invulnerable = 0;
+        showOverlay();
     }
 
     //returns true if entity should be deleted after collision
@@ -326,7 +339,6 @@
                         ship.lives--;
                         ship.invulnerable = INVULNERABILITY;
                         if (ship.lives == 0) {
-                            //showOverlay();
                             return "restart";
                         }
                     }
@@ -346,6 +358,10 @@
 
     function showOverlay() {
         document.getElementById("overlay").style.display = "block";
+    }
+
+    function hideOverlay() {
+        document.getElementById("overlay").style.display = "none";
     }
 
     function collision(entity1, entity2) {

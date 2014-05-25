@@ -10,7 +10,7 @@
 
     //game settings
     window.INITIAL_BULLETS = 5;
-    window.INITIAL_LIVES = 3;
+    window.INITIAL_LIVES = 1;
     window.INVULNERABILITY = 100;
     window.SHOOT_DELAY = 500;
     window.WORLD_SPEED = 0.5;
