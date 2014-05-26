@@ -51,6 +51,11 @@ html, body {
     opacity: 1;
 }
 
+.logo {
+    font-size: 3em;
+    color: #080;
+}
+
 #instructions {
 	display: block;
     margin: auto;

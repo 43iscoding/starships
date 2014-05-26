@@ -90,10 +90,11 @@
     var worldSpeed = WORLD_SPEED;
 
     var alive = true;
-    var paused = false;
 
     var generator = new Prime();
     var ship;
+
+    var STATE = "RUNNING";
 
     function getFreePosition(width, height, desirableX, desirableY) {
         var tries = 100;
@@ -129,11 +130,20 @@
         canvas.width = WIDTH;
         canvas.height = HEIGHT + PANEL_HEIGHT;
         context = canvas.getContext("2d");
+        //main menu/splash screen
+        showOverlay("splash");
+        STATE = "SPLASH";
         initMouseEvents();
+        initBackground();
+        //startGame();
+        tick();
+    }
 
+    function startGame() {
+        hideOverlay("splash");
+        STATE = "RUNNING";
         ship = createShip();
         restart();
-        tick();
     }
 
     function initMouseEvents() {
@@ -150,11 +160,13 @@
 
     function tick() {
         processInput();
-        if (!paused) {
+        if (STATE != "PAUSED") {
             time++;
             if (time % 50 == 0) {
                 worldSpeed += 0.05;
             }
+        }
+        if (STATE == "RUNNING") {
             worldStep();
             if (alive) increaseScore(1 / fps);
         }
@@ -163,6 +175,13 @@
     }
 
     function processInput() {
+        console.log("processInput: state=" + STATE);
+        if (STATE == "SPLASH") {
+            if (input.isPressed("SPACE")) {
+                startGame();
+            }
+            return;
+        }
         if (input.isPressed("R") && lastTimeRestarted + 200 < Date.now()) {
             lastTimeRestarted = Date.now();
             restart();
@@ -177,15 +196,16 @@
 
         if (input.isPressed("P") && lastTimePaused + 200 < Date.now()) {
             lastTimePaused = Date.now();
-            if (!paused) {
+            if (STATE == "RUNNING") {
                 showOverlay("pause");
-            } else {
+                STATE = "PAUSED";
+            } else if (STATE == "PAUSED") {
                 hideOverlay("pause");
+                STATE = "RUNNING";
             }
-            paused = !paused;
         }
 
-        if (paused) return;
+        if (STATE == "PAUSED") return;
 
         if (input.isPressed("UP")) {
             ship.ySpeed = -ship.maxSpeed;
@@ -284,6 +304,7 @@
     }
 
     function restart() {
+        input.clearInput();
         hideOverlay("death");
         initBackground();
         resetShip();
@@ -417,6 +438,7 @@
 
     function render() {
         renderBackground();
+        if (STATE == "SPLASH") return;
 
         renderEntities(entities);
         if (ship.invulnerable > 0) {
@@ -475,7 +497,7 @@
 
     function initBackground() {
         for (var i = 0; i < bgStars.length; i++) {
-            bgStars[i] = {x: i * WIDTH / bgStars.length, y: i * 700 * Math.random() % HEIGHT};
+            bgStars[i] = {x: i * WIDTH / bgStars.length, y: i * 700 * Math.random() % HEIGHT - 1};
         }
     }
 

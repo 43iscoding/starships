@@ -45,7 +45,12 @@
         return pressed[key];
     }
 
+    function clearInput() {
+        pressed = {};
+    }
+
     window.input = {
-        isPressed: isPressed
+        isPressed: isPressed,
+        clearInput: clearInput
     };
 }());
