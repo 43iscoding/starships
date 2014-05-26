@@ -7,7 +7,7 @@ Move your starship through the asteroid field.
 Survive as long as possible.
 Shoot laserbeams!
 
-[Play it now!](43iscoding.github.io/starships)
+[Play it now!](http://43iscoding.github.io/starships)
 
 **P.S.**
 
