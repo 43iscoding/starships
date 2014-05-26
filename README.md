@@ -9,14 +9,6 @@ Shoot laserbeams!
 
 [Play it now!](43iscoding.github.io/starships)
 
-####INSTRUCTIONS
-
-- **ARROWS** to move
-- **SPACE** to shoot
-- R to restart
-- M to mute
-
-
 **P.S.**
 
 This game is made for practice so gameplay is pretty simple and dumb.
