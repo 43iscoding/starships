@@ -1,26 +1,25 @@
-            -= S T A R S H I P S =-
-
-================- **DESCRIPTION** -===============
+##STARSHIPS
 
 A retro arcade created with HTML5/Canvas
+
 
 Move your starship through the asteroid field.
 Survive as long as possible.
 Shoot laserbeams!
 
-===============- **INSTRUCTIONS** -===============
+[Play it now!](43iscoding.github.io/starships)
+
+####INSTRUCTIONS
 
 - **ARROWS** to move
 - **SPACE** to shoot
 - R to restart
 - M to mute
 
-===============- **POST SCRIPTUM** -==============
 
-This game is made for practice 
-So its' gameplay is pretty simple and dumb
+**P.S.**
 
-It is still challenging enough tho :D
-So good luck and have fun playing it
+This game is made for practice so gameplay is pretty simple and dumb.
 
-~43
+
+It is still challenging enough tho - so good luck and have fun playing it ^^
