@@ -1,5 +1,18 @@
 (function() {
 
+    window.overlay = {
+        DEATH : "death",
+        PAUSED : "pause",
+        SPLASH : "splash"
+    };
+
+    window.state = {
+        DEATH : "death",
+        PAUSED : "pause",
+        SPLASH : "splash",
+        RUNNING : "running"
+    };
+
     function Entity(x, y, width, height, xSpeed, ySpeed, type, sprite, args) {
         this.x = x;
         this.y = y;
@@ -89,12 +102,10 @@
     var SHAKE = [0, 0, 0]; //shake screen (x,y,timeToShake)
     var worldSpeed = WORLD_SPEED;
 
-    var alive = true;
-
     var generator = new Prime();
     var ship;
 
-    var STATE = "RUNNING";
+    var gameState = state.SPLASH;
 
     function getFreePosition(width, height, desirableX, desirableY) {
         var tries = 100;
@@ -130,18 +141,16 @@
         canvas.width = WIDTH;
         canvas.height = HEIGHT + PANEL_HEIGHT;
         context = canvas.getContext("2d");
-        //main menu/splash screen
-        showOverlay("splash");
-        STATE = "SPLASH";
+        //splash screen
+        showOverlay(overlay.SPLASH);
+        gameState = state.SPLASH;
         initMouseEvents();
         initBackground();
-        //startGame();
         tick();
     }
 
     function startGame() {
-        hideOverlay("splash");
-        STATE = "RUNNING";
+        hideOverlay(overlay.SPLASH);
         ship = createShip();
         restart();
     }
@@ -160,23 +169,25 @@
 
     function tick() {
         processInput();
-        if (STATE != "PAUSED") {
+        if (gameState != state.PAUSED) {
             time++;
             if (time % 50 == 0) {
                 worldSpeed += 0.05;
             }
         }
-        if (STATE == "RUNNING") {
+        if (gameState == state.RUNNING || gameState == state.DEATH) {
             worldStep();
-            if (alive) increaseScore(1 / fps);
+        }
+
+        if (gameState == state.RUNNING) {
+            increaseScore(1 / fps);
         }
         render();
         setTimeout(tick, 1000 / fps);
     }
 
     function processInput() {
-        console.log("processInput: state=" + STATE);
-        if (STATE == "SPLASH") {
+        if (gameState == state.SPLASH) {
             if (input.isPressed("SPACE")) {
                 startGame();
             }
@@ -192,20 +203,20 @@
             sound.toggleMute();
         }
 
-        if (!alive) return;
+        if (gameState == state.DEATH) return;
 
         if (input.isPressed("P") && lastTimePaused + 200 < Date.now()) {
             lastTimePaused = Date.now();
-            if (STATE == "RUNNING") {
-                showOverlay("pause");
-                STATE = "PAUSED";
-            } else if (STATE == "PAUSED") {
-                hideOverlay("pause");
-                STATE = "RUNNING";
+            if (gameState == state.RUNNING) {
+                showOverlay(overlay.PAUSED);
+                gameState = state.PAUSED;
+            } else if (gameState == state.PAUSED) {
+                hideOverlay(overlay.PAUSED);
+                gameState = state.RUNNING;
             }
         }
 
-        if (STATE == "PAUSED") return;
+        if (gameState == state.PAUSED) return;
 
         if (input.isPressed("UP")) {
             ship.ySpeed = -ship.maxSpeed;
@@ -263,7 +274,7 @@
     function worldStep() {
         generateAsteroids(time);
 
-        if (time % 500 == 0 && alive) {
+        if (time % 500 == 0 && gameState == state.RUNNING) {
             entities.push(createBonus());
         }
 
@@ -304,11 +315,11 @@
     }
 
     function restart() {
+        gameState = state.RUNNING;
         input.clearInput();
-        hideOverlay("death");
+        hideOverlay(overlay.DEATH);
         initBackground();
         resetShip();
-        alive = true;
         entities = [ship];
         score = 0;
         time = 0;
@@ -347,9 +358,9 @@
         entities = entities.filter(function(entity) {
             return entity.type != "ship" && entity.type != "bonus";
         });
-        alive = false;
+        gameState = state.DEATH;
         ship.invulnerable = 0;
-        showOverlay("death");
+        showOverlay(overlay.DEATH);
     }
 
     //returns true if entity should be deleted after collision
@@ -438,7 +449,7 @@
 
     function render() {
         renderBackground();
-        if (STATE == "SPLASH") return;
+        if (gameState == state.SPLASH) return;
 
         renderEntities(entities);
         if (ship.invulnerable > 0) {
