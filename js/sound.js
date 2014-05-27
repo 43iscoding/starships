@@ -1,6 +1,6 @@
 (function() {
 
-    var muted = res.getCookie('muted', true) == "true";
+    var muted = res.getCookie(cookie.MUTED, true) == "true";
 
     var LOW_LAG_ENABLED = true;
 
@@ -23,7 +23,7 @@
 
     function toggleMute() {
         muted = !muted;
-        res.setCookie('muted', muted);
+        res.setCookie(cookie.MUTED, muted);
     }
 
     window.sound = {

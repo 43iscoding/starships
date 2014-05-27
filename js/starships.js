@@ -13,6 +13,11 @@
         RUNNING : "running"
     };
 
+    window.cookie = {
+        MUTED : "muted",
+        HIGHSCORE : "highscore"
+    };
+
     function Entity(x, y, width, height, xSpeed, ySpeed, type, sprite, args) {
         this.x = x;
         this.y = y;
@@ -231,8 +236,6 @@
         if (input.isPressed("SPACE") && lastTimeShot + SHOOT_DELAY < Date.now() && ship.bullets > 0) {
             shoot();
         }
-
-
     }
 
     function shoot() {
@@ -242,14 +245,13 @@
         entities.push(createBullet());
     }
 
-    function updateEntities(entities) {
-        for (var i = 0; i < entities.length; i++) {
-            updateEntity(entities[i]);
-        }
-    }
-
+    /**
+     * Updates state and sprite of the entity
+     * @param entity to update
+     * @returns {boolean} true if entity should be deleted
+     */
     function updateEntity(entity) {
-        entity.sprite.update();
+        entity.updateSprite();
         if (entity.applyInertia) {
             applyInertia(entity);
         }
@@ -402,9 +404,9 @@
 
     function increaseScore(value) {
         score += value;
-        var highScore = res.getCookie("highscore", 0);
+        var highScore = res.getCookie(cookie.HIGHSCORE, 0);
         if (score > highScore) {
-            res.setCookie("highscore", score);
+            res.setCookie(cookie.HIGHSCORE, score);
         }
     }
 
@@ -478,7 +480,7 @@
         }
 
         context.fillText(pad(Math.floor(score).toString(), 4), WIDTH - 52, HEIGHT + 17);
-        var highScore = res.getCookie("highscore", 0);
+        var highScore = res.getCookie(cookie.HIGHSCORE, 0);
         context.fillText(pad(Math.floor(highScore).toString(), 4), WIDTH - 52, HEIGHT + 32);
         context.fillText(pad(ship.bullets.toString(), 2), 94, HEIGHT + 17);
         context.fillText(pad(ship.lives.toString(), 2), 94, HEIGHT + 32);
