@@ -18,4 +18,22 @@
 
     window.INERTIA = 0.1;
 
+    window.overlay = {
+        DEATH : "death",
+        PAUSED : "pause",
+        SPLASH : "splash"
+    };
+
+    window.state = {
+        DEATH : "death",
+        PAUSED : "pause",
+        SPLASH : "splash",
+        RUNNING : "running"
+    };
+
+    window.cookie = {
+        MUTED : "muted",
+        HIGHSCORE : "highscore"
+    };
+
 }());

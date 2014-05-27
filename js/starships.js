@@ -1,23 +1,5 @@
 (function() {
 
-    window.overlay = {
-        DEATH : "death",
-        PAUSED : "pause",
-        SPLASH : "splash"
-    };
-
-    window.state = {
-        DEATH : "death",
-        PAUSED : "pause",
-        SPLASH : "splash",
-        RUNNING : "running"
-    };
-
-    window.cookie = {
-        MUTED : "muted",
-        HIGHSCORE : "highscore"
-    };
-
     function Entity(x, y, width, height, xSpeed, ySpeed, type, sprite, args) {
         this.x = x;
         this.y = y;
