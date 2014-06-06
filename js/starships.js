@@ -94,6 +94,8 @@
 
     var gameState = state.SPLASH;
 
+    var nextTimeSoundTrack = 0;
+
     function getFreePosition(width, height, desirableX, desirableY) {
         var tries = 100;
         var x, y;
@@ -119,6 +121,7 @@
         lowLag.load(['explosion.wav'], 'explosion');
         lowLag.load(['laser.wav'], 'laser');
         lowLag.load(['powerup.wav'], 'powerup');
+        lowLag.load(['stars.wav'], 'soundtrack');
         res.onReady(start);
         res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui", "sound"]);
     }
@@ -162,6 +165,13 @@
                 worldSpeed += 0.05;
             }
         }
+
+        //background music hardcoded
+        if (nextTimeSoundTrack < Date.now()) {
+            sound.play('soundtrack');
+            nextTimeSoundTrack = Date.now() + soundTrackLength;
+        }
+
         if (gameState == state.RUNNING || gameState == state.DEATH) {
             worldStep();
         }

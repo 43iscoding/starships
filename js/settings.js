@@ -36,4 +36,6 @@
         HIGHSCORE : "highscore"
     };
 
+    window.soundTrackLength = 94000;
+
 }());
