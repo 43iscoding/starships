@@ -1,7 +1,7 @@
 (function() {
 
     var prefix = "resources/sound/";
-    var postfix = ".wav";
+    var postfix = ".mp3";
 
     var sounds = {};
 
