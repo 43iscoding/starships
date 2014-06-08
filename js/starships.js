@@ -114,16 +114,8 @@
         return {x: x, y: y};
     }
 
-    function loadGame() {
-        res.onReady(start);
-        res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui", "sound"]);
-        res.loadSound(["explosion", "laser", "powerup", ["soundtrack", true]]);
-    }
-
-    function start() {
+    function init() {
         canvas = document.getElementById('canvas');
-        canvas.width = WIDTH;
-        canvas.height = HEIGHT + PANEL_HEIGHT;
         context = canvas.getContext("2d");
         //splash screen
         showOverlay(overlay.SPLASH);
@@ -517,5 +509,5 @@
         }
     }
 
-    window.loadGame = loadGame;
+    window.init = init;
 }());

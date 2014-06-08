@@ -8,6 +8,8 @@
     var prefix = "resources/";
     var postfix = ".png";
 
+    var DEBUG = false;
+
     var ignoreLoaded = false;
 
     function load(url) {
@@ -22,11 +24,11 @@
 
     function loadSound(url) {
         if (url instanceof Array) {
-            url.forEach(function (url) {
-                if (url instanceof Array) {
-                    _loadSound(url[0], url[1]);
+            url.forEach(function (audio) {
+                if (audio instanceof Array) {
+                    _loadSound(audio[0], audio[1]);
                 } else {
-                    _loadSound(url);
+                    _loadSound(audio, false);
                 }
             });
         } else {
@@ -35,17 +37,20 @@
     }
 
     function _loadSound(name, music) {
-        var audio = new Audio(sound.format(name));
-        audio.onloadeddata = function() {
+        var audio = new Audio();
+        audio.addEventListener('canplaythrough', function() {
+            if (DEBUG) console.log("Sound loaded: " + name);
             sound.registerSound(name, audio, music == undefined ? false : music);
             cache[sound.format(name)] = true;
             if (loaded()) {
+                if (ignoreLoaded) return;
                 callbacks.forEach(function(callback) {
                     callback();
                 });
                 ignoreLoaded = true;
             }
-        };
+        });
+        audio.src = sound.format(name);
         cache[sound.format(name)] = false;
     }
 
@@ -58,15 +63,17 @@
             return cache[format(url)];
         } else {
             var image = new Image();
-            image.onload = function () {
+            image.addEventListener('load', function() {
+                if (DEBUG) console.log("Image loaded: " + url);
                 cache[format(url)] = image;
                 if (loaded()) {
+                    if (ignoreLoaded) return;
                     callbacks.forEach(function(callback) {
                         callback();
                     });
                     ignoreLoaded = true;
                 }
-            };
+            });
             cache[format(url)] = false;
             image.src = format(url);
         }
@@ -77,9 +84,6 @@
     }
 
     function loaded() {
-        if (ignoreLoaded) {
-            return false;
-        }
         for (var url in cache) {
             if (cache.hasOwnProperty(url) && !cache[url]) return false;
         }
@@ -94,10 +98,23 @@
         load: load,
         loadSound: loadSound,
         get: get,
+        loadingProgress: loadingProgress,
         onReady: addCallback,
         setCookie: setCookie,
-        getCookie: getCookie
+        getCookie: getCookie,
+        loaded: loaded
     };
+
+    function loadingProgress() {
+        var total = 0;
+        var loaded = 0;
+        for (var url in cache) {
+            if (!cache.hasOwnProperty(url)) continue;
+            total++;
+            if (cache[url]) loaded++;
+        }
+        return loaded / total;
+    }
 
     function setCookie(name, value, days) {
         if (days == undefined) days = COOKIE_EXPIRES;

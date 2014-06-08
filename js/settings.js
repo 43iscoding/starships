@@ -43,5 +43,16 @@
     };
 
     window.soundTrackLength = 94000;
+    window.PIXEL_RATIO = function () {
+        var ctx = document.getElementById("canvas").getContext("2d"),
+            dpr = window.devicePixelRatio || 1,
+            bsr = ctx.webkitBackingStorePixelRatio ||
+                ctx.mozBackingStorePixelRatio ||
+                ctx.msBackingStorePixelRatio ||
+                ctx.oBackingStorePixelRatio ||
+                ctx.backingStorePixelRatio || 1;
+
+        return dpr / bsr;
+    };
 
 }());
