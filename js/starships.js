@@ -117,7 +117,7 @@
     function loadGame() {
         res.onReady(start);
         res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui", "sound"]);
-        res.loadSound(["explosion", "laser", "powerup", "soundtrack"]);
+        res.loadSound(["explosion", "laser", "powerup", ["soundtrack", true]]);
     }
 
     function start() {
@@ -459,7 +459,9 @@
 
         context.fillStyle = "#171";
         //draw sound button
-        if (sound.muted()) {
+        if (sound.muted() == muted.ALL) {
+            context.drawImage(res.get("sound"),60, 0, 30, 30, WIDTH - 15, 0, 15, 15);
+        } else if (sound.muted() == muted.MUSIC) {
             context.drawImage(res.get("sound"),30, 0, 30, 30, WIDTH - 15, 0, 15, 15);
         } else {
             context.drawImage(res.get("sound"),0, 0, 30, 30, WIDTH - 15, 0, 15, 15);

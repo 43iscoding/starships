@@ -36,6 +36,12 @@
         HIGHSCORE : "highscore"
     };
 
+    window.muted = {
+        NONE : "mute_none",
+        MUSIC : "mute_music",
+        ALL : "mute_all"
+    };
+
     window.soundTrackLength = 94000;
 
 }());

@@ -5,10 +5,10 @@
 
     var sounds = {};
 
-    var muted = res.getCookie(cookie.MUTED, true) == "true";
+    var state = res.getCookie(cookie.MUTED, muted.NONE);
 
-    function registerSound(name, audio) {
-        sounds[name] = audio;
+    function registerSound(name, audio, music) {
+        sounds[name] = {audio: audio, music: music};
     }
 
     function play(name, loop) {
@@ -16,9 +16,10 @@
             console.log("Could not play sound: " + name + " is not loaded yet");
             return;
         }
-        sounds[name].play();
-        sounds[name].onended = function() {
-            console.log("ended playing: " + name);
+        var audio = sounds[name].audio;
+        audio.play();
+        muteIfNeeded(audio, sounds[name].music);
+        audio.onended = function() {
             //this.currentTime = 0;
             this.load();
             if (loop) {
@@ -32,12 +33,23 @@
     }
 
     function toggleMute() {
-        muted = !muted;
+        if (state == muted.NONE) {
+            state = muted.MUSIC;
+        } else if (state == muted.MUSIC) {
+            state = muted.ALL;
+        } else {
+            state = muted.NONE;
+        }
+
         for (var audio in sounds) {
             if (!sounds.hasOwnProperty(audio)) continue;
-            sounds[audio].muted = muted;
+            muteIfNeeded(sounds[audio].audio, sounds[audio].music);
         }
-        res.setCookie(cookie.MUTED, muted);
+        res.setCookie(cookie.MUTED, state);
+    }
+
+    function muteIfNeeded(audio, music) {
+        audio.muted = (state == muted.ALL) || (state == muted.MUSIC && music);
     }
 
     window.sound = {
@@ -46,7 +58,7 @@
         registerSound: registerSound,
         format: format,
         muted: function() {
-            return muted;
+            return state;
         }
     };
 }());

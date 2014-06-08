@@ -23,19 +23,21 @@
     function loadSound(url) {
         if (url instanceof Array) {
             url.forEach(function (url) {
-                _loadSound(url);
+                if (url instanceof Array) {
+                    _loadSound(url[0], url[1]);
+                } else {
+                    _loadSound(url);
+                }
             });
         } else {
             _loadSound(url);
         }
     }
 
-    function _loadSound(name) {
-        console.log("loading sound: " + name);
+    function _loadSound(name, music) {
         var audio = new Audio(sound.format(name));
         audio.onloadeddata = function() {
-            console.log("sound loaded: " + name);
-            sound.registerSound(name, audio);
+            sound.registerSound(name, audio, music == undefined ? false : music);
             cache[sound.format(name)] = true;
             if (loaded()) {
                 callbacks.forEach(function(callback) {
