@@ -8,6 +8,8 @@
     var prefix = "resources/";
     var postfix = ".png";
 
+    var ignoreLoaded = false;
+
     function load(url) {
         if (url instanceof Array) {
             url.forEach(function (url) {
@@ -18,33 +20,64 @@
         }
     }
 
+    function loadSound(url) {
+        if (url instanceof Array) {
+            url.forEach(function (url) {
+                _loadSound(url);
+            });
+        } else {
+            _loadSound(url);
+        }
+    }
+
+    function _loadSound(name) {
+        console.log("loading sound: " + name);
+        var audio = new Audio(sound.format(name));
+        audio.onloadeddata = function() {
+            console.log("sound loaded: " + name);
+            sound.registerSound(name, audio);
+            cache[sound.format(name)] = true;
+            if (loaded()) {
+                callbacks.forEach(function(callback) {
+                    callback();
+                });
+                ignoreLoaded = true;
+            }
+        };
+        cache[sound.format(name)] = false;
+    }
+
     function format(url) {
         return prefix + url + postfix;
     }
 
     function _load(url) {
-        if (cache[url]) {
-            return cache[url];
+        if (cache[format(url)]) {
+            return cache[format(url)];
         } else {
             var image = new Image();
             image.onload = function () {
-                cache[url] = image;
+                cache[format(url)] = image;
                 if (loaded()) {
                     callbacks.forEach(function(callback) {
                         callback();
-                    })
+                    });
+                    ignoreLoaded = true;
                 }
             };
-            cache[url] = false;
+            cache[format(url)] = false;
             image.src = format(url);
         }
     }
 
     function get(url) {
-        return cache[url];
+        return cache[format(url)];
     }
 
     function loaded() {
+        if (ignoreLoaded) {
+            return false;
+        }
         for (var url in cache) {
             if (cache.hasOwnProperty(url) && !cache[url]) return false;
         }
@@ -57,6 +90,7 @@
 
     window.res = {
         load: load,
+        loadSound: loadSound,
         get: get,
         onReady: addCallback,
         setCookie: setCookie,

@@ -115,15 +115,9 @@
     }
 
     function loadGame() {
-        lowLag.init({ sm2url : "lib/sm2/swf/",
-                      urlPrefix : "resources/sound/",
-                      debug : "none"});
-        lowLag.load(['explosion.wav'], 'explosion');
-        lowLag.load(['laser.wav'], 'laser');
-        lowLag.load(['powerup.wav'], 'powerup');
-        lowLag.load(['stars.wav'], 'soundtrack');
         res.onReady(start);
         res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui", "sound"]);
+        res.loadSound(["explosion", "laser", "powerup", "soundtrack"]);
     }
 
     function start() {
@@ -168,7 +162,7 @@
 
         //background music hardcoded
         if (nextTimeSoundTrack < Date.now()) {
-            sound.play('soundtrack');
+            sound.play('soundtrack', true);
             nextTimeSoundTrack = Date.now() + soundTrackLength;
         }
 

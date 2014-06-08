@@ -1,20 +1,30 @@
 (function() {
 
-    var muted = res.getCookie(cookie.MUTED, true) == "true";
-
-    var LOW_LAG_ENABLED = true;
-
     var prefix = "resources/sound/";
     var postfix = ".wav";
 
-    function play(name) {
-        if (muted) return;
-        if (LOW_LAG_ENABLED) {
-            lowLag.play(name);
+    var sounds = {};
+
+    var muted = res.getCookie(cookie.MUTED, true) == "true";
+
+    function registerSound(name, audio) {
+        sounds[name] = audio;
+    }
+
+    function play(name, loop) {
+        if (sounds[name] == "undefined" || sounds[name] == null) {
+            console.log("Could not play sound: " + name + " is not loaded yet");
             return;
         }
-        var audio = new Audio(format(name));
-        audio.play();
+        sounds[name].play();
+        sounds[name].onended = function() {
+            console.log("ended playing: " + name);
+            //this.currentTime = 0;
+            this.load();
+            if (loop) {
+                play(name, true);
+            }
+        }
     }
 
     function format(name) {
@@ -23,12 +33,18 @@
 
     function toggleMute() {
         muted = !muted;
+        for (var audio in sounds) {
+            if (!sounds.hasOwnProperty(audio)) continue;
+            sounds[audio].muted = muted;
+        }
         res.setCookie(cookie.MUTED, muted);
     }
 
     window.sound = {
         play: play,
         toggleMute: toggleMute,
+        registerSound: registerSound,
+        format: format,
         muted: function() {
             return muted;
         }
