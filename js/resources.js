@@ -42,6 +42,7 @@
             if (DEBUG) console.log("Sound loaded: " + name);
             sound.registerSound(name, audio, music == undefined ? false : music);
             cache[sound.format(name)] = true;
+            loader.update(loadingProgress());
             if (loaded()) {
                 if (ignoreLoaded) return;
                 callbacks.forEach(function(callback) {
@@ -66,6 +67,7 @@
             image.addEventListener('load', function() {
                 if (DEBUG) console.log("Image loaded: " + url);
                 cache[format(url)] = image;
+                loader.update(loadingProgress());
                 if (loaded()) {
                     if (ignoreLoaded) return;
                     callbacks.forEach(function(callback) {
@@ -113,7 +115,7 @@
             total++;
             if (cache[url]) loaded++;
         }
-        return loaded / total;
+        return (loaded / total * 100).toFixed();
     }
 
     function setCookie(name, value, days) {

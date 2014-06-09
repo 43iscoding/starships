@@ -1,6 +1,2 @@
 . coins
-. expiring effects
 . explosions
-. more sound effects
-. rework art
-. preloader
