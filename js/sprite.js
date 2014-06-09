@@ -1,5 +1,5 @@
 (function() {
-    function Sprite(img, pos, size, frames, speed) {
+    function Sprite(img, pos, size, frames, speed, once) {
         this.img = img;
         this.pos = pos;
         this.size = size;
@@ -7,6 +7,7 @@
         this.index = 0;
         this.frame = 0;
         this.speed = speed;
+        this.once = once == undefined ? false : once;
     }
 
     Sprite.prototype = {
@@ -15,6 +16,7 @@
 
             this.index += (fps * this.speed) / 1000;
             this.frame = Math.floor(this.index) % this.frames;
+            return this.once && (this.frame == this.frames - 1);
         },
         reset: function () {
             this.index = 0;

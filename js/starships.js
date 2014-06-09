@@ -10,7 +10,8 @@
         this.type = type;
         this.sprite = new Sprite(res.get(sprite['name']), sprite['pos'], [width, height],
             sprite['frames'] == undefined ? 1 : sprite['frames'],
-            sprite['speed'] == undefined ? 0 : sprite['speed']);
+            sprite['speed'] == undefined ? 0 : sprite['speed'],
+            sprite['once'] == undefined ? false : sprite['once']);
         this.canLeaveScreen = true;
         if (args != undefined) {
             this.worldSpeedAffected = args['worldSpeed'] == undefined ? false : args['worldSpeed'];
@@ -23,7 +24,7 @@
 
     Entity.prototype = {
         updateSprite : function() {
-            this.sprite.update();
+            return this.sprite.update();
         }
     };
 
@@ -67,16 +68,31 @@
 
     function createBonus() {
         var pos = getFreePosition(20, 20, WIDTH * 11 / 10);
-        var id = Math.round(Math.random() * 3);
+        var id = Math.round(Math.random() * 4);
         return new Bonus(pos.x, pos.y, -1, 0,
             {name : "crates", pos : [20 * id, 0]},
-            {worldSpeed : true, ammo: (id + 1) * 2, type : id == 3 ? 'life' : 'ammo'});
+            {worldSpeed : true, ammo: (id + 1) * 2, type : getCrateType(id)});
+    }
+
+    function getCrateType(id) {
+        switch (id) {
+            case 3: return 'life';
+            case 4: return 'score';
+            default: return 'ammo';
+        }
+    }
+
+    function createExplosion(x, y) {
+        return new Entity(x, y, 24, 24, -1, 0, "effect",
+            {name : "explosion_mid", pos: [0,0], frames: 8, speed: 3, once: true},
+            {worldSpeed : true, destroyLeft: true});
     }
 
     var canvas;
     var context;
 
     var entities = [];
+    var effects = [];
 
     var bgStars = new Array(BG_STARS_NUM);
 
@@ -223,13 +239,24 @@
         entities.push(createBullet());
     }
 
+    function updateEntities(list) {
+        for (var i = 0; i < list.length; i++) {
+            if (updateEntity(list[i])) {
+                list.splice(i, 1);
+                i--;
+            }
+        }
+    }
+
     /**
      * Updates state and sprite of the entity
      * @param entity to update
      * @returns {boolean} true if entity should be deleted
      */
     function updateEntity(entity) {
-        entity.updateSprite();
+        if (entity.updateSprite()) {
+            return true;
+        }
         if (entity.applyInertia) {
             applyInertia(entity);
         }
@@ -265,12 +292,8 @@
             ship.shield.reset();
         }
 
-        for (var i = 0; i < entities.length; i++) {
-            if (updateEntity(entities[i])) {
-                entities.splice(i, 1);
-                i--;
-            }
-        }
+        updateEntities(entities);
+        updateEntities(effects);
 
         runCollisions();
         if (SHAKE[2] > 0) {
@@ -348,14 +371,21 @@
         if (!collision(entity, collided)) return null;
         switch (collided.type) {
             case "ship": return entity.type != "bullet" ? "delete" : null;
-            case "bullet": return entity.type == "asteroid" ? "delete" : null;
+            case "bullet": {
+                if (entity.type != "asteroid") return null;
+                sound.play("explosion_small");
+                effects.push(createExplosion(entity.x, entity.y));
+                return "delete";
+            }
             case "bonus": {
                 if (entity.type == "ship") {
                     sound.play("powerup");
                     if (collided.bonusType == "ammo") {
                         ship.bullets += collided.ammo;
-                    } else if (collided.bonusType = "life") {
+                    } else if (collided.bonusType == "life") {
                         ship.lives++;
+                    } else if (collided.bonusType == "score") {
+                        increaseScore(10);
                     }
                 }
                 return null;
@@ -366,11 +396,13 @@
                     return "delete";
                 } else if (entity.type == "ship") {
                     if (ship.invulnerable == 0) {
+                        effects.push(createExplosion(collided.x, collided.y));
                         sound.play("explosion");
                         SHAKE[2] = TIME_TO_SHAKE;
                         ship.lives--;
                         ship.invulnerable = INVULNERABILITY;
                         if (ship.lives == 0) {
+                            sound.play("explosion_big");
                             return "restart";
                         }
                     }
@@ -432,6 +464,7 @@
         if (gameState == state.SPLASH) return;
 
         renderEntities(entities);
+        renderEntities(effects);
         if (ship.invulnerable > 0) {
             renderSprite(ship.shield, ship.x - 5, ship.y - 5);
         }

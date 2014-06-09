@@ -3,8 +3,8 @@
     function loadGame() {
         initScreen();
         res.onReady(loaded);
-        res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui", "sound"]);
-        res.loadSound(["explosion", "laser", "powerup", ["soundtrack", true]]);
+        res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui", "sound", "explosion", "explosion_mid"]);
+        res.loadSound(["explosion", "explosion_big", "explosion_small", "laser", "powerup", ["soundtrack", true]]);
     }
 
     function initScreen() {
