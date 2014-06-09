@@ -395,8 +395,8 @@
                     increaseScore(5);
                     return "delete";
                 } else if (entity.type == "ship") {
+                    effects.push(createExplosion(collided.x, collided.y));
                     if (ship.invulnerable == 0) {
-                        effects.push(createExplosion(collided.x, collided.y));
                         sound.play("explosion");
                         SHAKE[2] = TIME_TO_SHAKE;
                         ship.lives--;
@@ -405,6 +405,8 @@
                             sound.play("explosion_big");
                             return "restart";
                         }
+                    } else {
+                        sound.play("explosion_small");
                     }
                 }
                 return null;
