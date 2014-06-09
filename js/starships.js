@@ -259,7 +259,7 @@
         }
 
         if (ship.invulnerable > 0) {
-            ship.invulnerable--; //TODO: move to expiring effects
+            ship.invulnerable--;
             ship.shield.update();
         } else {
             ship.shield.reset();

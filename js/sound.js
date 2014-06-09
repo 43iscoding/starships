@@ -20,7 +20,6 @@
         audio.play();
         muteIfNeeded(audio, sounds[name].music);
         audio.onended = function() {
-            //this.currentTime = 0;
             this.load();
             if (loop) {
                 play(name, true);

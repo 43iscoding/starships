@@ -1,5 +1,5 @@
 (function() {
-    var Prime = function () {
+    window.Prime = function () {
         this.primes = [37];
         // current generator number
         this.prime = 37;
@@ -38,5 +38,4 @@
             return this.prime;
         }
     };
-    window.Prime = Prime;
 }());

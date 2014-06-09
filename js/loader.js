@@ -1,7 +1,5 @@
 (function(){
 
-    var interval;
-
     function loadGame() {
         initScreen();
         res.onReady(loaded);

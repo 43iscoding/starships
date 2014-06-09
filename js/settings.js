@@ -51,7 +51,6 @@
                 ctx.msBackingStorePixelRatio ||
                 ctx.oBackingStorePixelRatio ||
                 ctx.backingStorePixelRatio || 1;
-
         return dpr / bsr;
     };
 
