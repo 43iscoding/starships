@@ -42,9 +42,9 @@
             if (DEBUG) console.log("Sound loaded: " + name);
             sound.registerSound(name, audio, music == undefined ? false : music);
             cache[sound.format(name)] = true;
+            if (ignoreLoaded) return;
             loader.update(loadingProgress());
             if (loaded()) {
-                if (ignoreLoaded) return;
                 callbacks.forEach(function(callback) {
                     callback();
                 });
@@ -67,9 +67,9 @@
             image.addEventListener('load', function() {
                 if (DEBUG) console.log("Image loaded: " + url);
                 cache[format(url)] = image;
+                if (ignoreLoaded) return;
                 loader.update(loadingProgress());
                 if (loaded()) {
-                    if (ignoreLoaded) return;
                     callbacks.forEach(function(callback) {
                         callback();
                     });

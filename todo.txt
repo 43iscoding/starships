@@ -1,2 +1,3 @@
 . coins
 . explosions
+. refactor res/loader to one class
