@@ -83,7 +83,7 @@
     }
 
     function createExplosion(x, y) {
-        return new Entity(x, y, 24, 24, -1, 0, "effect",
+        return new Entity(x - 3, y - 3, 24, 24, -1, 0, "effect",
             {name : "explosion_mid", pos: [0,0], frames: 8, speed: 3, once: true},
             {worldSpeed : true, destroyLeft: true});
     }
