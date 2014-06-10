@@ -179,7 +179,7 @@
         }
 
         if (gameState == state.RUNNING) {
-            increaseScore(1 / fps);
+            increaseScore(WORLD_SPEED * 2 / fps);
         }
         render();
         setTimeout(tick, 1000 / fps);
@@ -385,7 +385,7 @@
                     } else if (collided.bonusType == "life") {
                         ship.lives++;
                     } else if (collided.bonusType == "score") {
-                        increaseScore(10);
+                        increaseScore(25);
                     }
                 }
                 return null;
