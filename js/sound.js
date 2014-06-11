@@ -5,10 +5,15 @@
 
     var sounds = {};
 
+    var BUFFER_SIZE = 3;
+
     var state = res.getCookie(cookie.MUTED, muted.NONE);
 
     function registerSound(name, audio, music) {
-        sounds[name] = {audio: audio, music: music};
+        if (!(sounds[name] instanceof Array)) {
+            sounds[name] = [];
+        }
+        sounds[name].push({audio: audio, music: music});
     }
 
     function play(name, loop) {
@@ -16,14 +21,26 @@
             console.log("Could not play sound: " + name + " is not loaded yet");
             return;
         }
-        var audio = sounds[name].audio;
-        audio.play();
-        muteIfNeeded(audio, sounds[name].music);
-        audio.onended = function() {
-            this.load();
-            if (loop) {
-                play(name, true);
+        var buffer = sounds[name];
+        var played = false;
+        for (var i = 0; i < getBufferSize(buffer[0].music); i++) {
+            var audio = buffer[i].audio;
+            if (!audio.paused && audio.currentTime > 0) {
+                continue;
             }
+            audio.play();
+            muteIfNeeded(audio, buffer[i].music);
+            audio.onended = function() {
+                this.load();
+                if (loop) {
+                    play(name, true);
+                }
+            };
+            played = true;
+            break;
+        }
+        if (!played) {
+            console.log("Could not play " + name + " - Buffer size is " + buffer);
         }
     }
 
@@ -40,15 +57,21 @@
             state = muted.NONE;
         }
 
-        for (var audio in sounds) {
-            if (!sounds.hasOwnProperty(audio)) continue;
-            muteIfNeeded(sounds[audio].audio, sounds[audio].music);
+        for (var buffer in sounds) {
+            if (!sounds.hasOwnProperty(buffer)) continue;
+            sounds[buffer].forEach(function(audio) {
+                muteIfNeeded(audio.audio, audio.music);
+            });
         }
         res.setCookie(cookie.MUTED, state);
     }
 
     function muteIfNeeded(audio, music) {
         audio.muted = (state == muted.ALL) || (state == muted.MUSIC && music);
+    }
+
+    function getBufferSize(music) {
+        return music ? 1 : BUFFER_SIZE;
     }
 
     window.sound = {
@@ -58,6 +81,7 @@
         format: format,
         muted: function() {
             return state;
-        }
+        },
+        getBufferSize: getBufferSize
     };
 }());

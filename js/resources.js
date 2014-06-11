@@ -37,22 +37,25 @@
     }
 
     function _loadSound(name, music) {
-        var audio = new Audio();
-        audio.addEventListener('canplaythrough', function() {
-            if (DEBUG) console.log("Sound loaded: " + name);
-            sound.registerSound(name, audio, music == undefined ? false : music);
-            cache[sound.format(name)] = true;
-            if (ignoreLoaded) return;
-            loader.update(loadingProgress());
-            if (loaded()) {
-                callbacks.forEach(function(callback) {
-                    callback();
-                });
-                ignoreLoaded = true;
-            }
-        });
-        audio.src = sound.format(name);
-        cache[sound.format(name)] = false;
+        for (var i = 0; i < sound.getBufferSize(music); i++) {
+            var audio = new Audio();
+            audio.bufferIndex = i;
+            audio.addEventListener('canplaythrough', function() {
+                if (DEBUG) console.log("Sound loaded: " + name + (this.bufferIndex == 0 ? "" : "(Buffered-" + this.bufferIndex + ")"));
+                sound.registerSound(name, this, music == undefined ? false : music);
+                cache[sound.format(name) + this.bufferIndex] = true;
+                if (ignoreLoaded) return;
+                loader.update(loadingProgress());
+                if (loaded()) {
+                    callbacks.forEach(function(callback) {
+                        callback();
+                    });
+                    ignoreLoaded = true;
+                }
+            });
+            audio.src = sound.format(name);
+            cache[sound.format(name) + audio.bufferIndex] = false;
+        }
     }
 
     function format(url) {
