@@ -4,6 +4,8 @@ html, body {
     background-color: #000;
 }
 
+@font-face {font-family: Visitor; src: url("../resources/visitor.ttf"); }
+
 #canvasDiv {
     display: block;
     margin: auto;
@@ -45,8 +47,7 @@ html, body {
     width:100%;
     text-align: center;
 
-    font-family: Visitor;
-    font-size: 1.6em;
+    font: 1.6em Visitor;
     color: #555;
     opacity: 1;
 }
@@ -68,8 +69,7 @@ html, body {
     margin-left: -90px;
 	margin-top: 120px;
 
-	font-family: Visitor;
-    font-size: 1.6em;
+    font: 1.6em Visitor;
     color: #333;
 }
 
@@ -79,10 +79,6 @@ html, body {
     left: 50%;
 
     margin-left: -8px;
-
-    font-family: Visitor;
-    font-size: 1.6em;
-    color: #333;
 }
 
 .overlayKey {
