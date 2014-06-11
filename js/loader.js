@@ -1,6 +1,7 @@
 (function(){
 
     function loadGame() {
+        document.body.style.zoom = "150%";
         initScreen();
         res.onReady(loaded);
         res.load(["starship", "laser", "shield", "asteroidPale", "crates", "ui", "sound", "explosion", "explosion_mid"]);
