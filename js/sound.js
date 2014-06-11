@@ -82,6 +82,9 @@
         muted: function() {
             return state;
         },
-        getBufferSize: getBufferSize
+        getBufferSize: getBufferSize,
+        list: function() {
+            return sounds;
+        }
     };
 }());

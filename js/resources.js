@@ -38,11 +38,10 @@
 
     function _loadSound(name, music) {
         for (var i = 0; i < sound.getBufferSize(music); i++) {
-            var audio = new Audio();
+            var audio = document.createElement('audio');
             audio.bufferIndex = i;
             audio.addEventListener('canplaythrough', function() {
                 if (DEBUG) console.log("Sound loaded: " + name + (this.bufferIndex == 0 ? "" : "(Buffered-" + this.bufferIndex + ")"));
-                sound.registerSound(name, this, music == undefined ? false : music);
                 cache[sound.format(name) + this.bufferIndex] = true;
                 if (ignoreLoaded) return;
                 loader.update(loadingProgress());
@@ -53,8 +52,24 @@
                     ignoreLoaded = true;
                 }
             });
+            audio.preload = 'auto';
             audio.src = sound.format(name);
+
             cache[sound.format(name) + audio.bufferIndex] = false;
+
+            sound.registerSound(name, audio, music == undefined ? false : music);
+        }
+        //setTimeout(checkSoundsLoaded, 1000);
+    }
+
+    function checkSoundsLoaded() {
+        var sounds = sound.list();
+        for (var buffer in sounds) {
+            if (sounds.hasOwnProperty(buffer)) {
+                sounds[buffer].forEach(function(audio) {
+                    console.log(buffer + " -> " + audio.audio.readyState);
+                });
+            }
         }
     }
 
@@ -68,7 +83,6 @@
         } else {
             var image = new Image();
             image.addEventListener('load', function() {
-                if (DEBUG) console.log("Image loaded: " + url);
                 cache[format(url)] = image;
                 if (ignoreLoaded) return;
                 loader.update(loadingProgress());
