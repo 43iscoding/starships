@@ -179,7 +179,7 @@
         }
 
         if (gameState == state.RUNNING) {
-            increaseScore(WORLD_SPEED * 2 / fps);
+            increaseScore(worldSpeed * 2 / fps);
         }
         render();
         setTimeout(tick, 1000 / fps);
